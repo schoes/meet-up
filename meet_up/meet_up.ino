@@ -18,6 +18,7 @@ const int LED_RED_PIN = 2;
 const int LED_GREEN_PIN = 3;
 ////////////////////////
 //Set the occuped state
+boolean occupied = false;
 ///////////////////////
 //Maximum length of the array
 #define MAX_LEN 16
@@ -35,6 +36,10 @@ void wirteOccupiedState(boolean occupied) {
   }
 }
 
+boolean switchIt(boolean input) {
+  return !input;
+}
+
 void setup() {
   Serial.begin(9600); // RFID reader SOUT pin connected to Serial RX pin at 9600bps
   // start the SPI library:
@@ -46,7 +51,7 @@ void setup() {
   pinMode(NRSTPD, OUTPUT); // Set digital pin 10 , Not Reset and Power-down
   digitalWrite(NRSTPD, HIGH);
   myRFID.AddicoreRFID_Init();
-  wirteOccupiedState(false);
+  wirteOccupiedState(occupied);
 }
 void loop()
 {
@@ -61,6 +66,8 @@ void loop()
   status = myRFID.AddicoreRFID_Request(PICC_REQIDL, str);
   if (status == MI_OK)
   {
+    occupied = switchIt(occupied);
+    wirteOccupiedState(occupied);
     Serial.println("RFID tag detected");
     Serial.print(str[0], BIN);
     Serial.print(" , ");
@@ -72,6 +79,7 @@ void loop()
   status = myRFID.AddicoreRFID_Anticoll(str);
   if (status == MI_OK)
   {
+
     checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
     Serial.println("The tag's number is : ");
     //Serial.print(2);
