@@ -7,12 +7,6 @@
 
    Released into the public domain.
    ----------------------------------------------------------------------------
-   This sample shows how to read and write data blocks on a MIFARE Classic PICC
-   (= card/tag).
-
-   BEWARE: Data will be written to the PICC, in sector #1 (blocks #4 to #7).
-
-
    Typical pin layout used:
    -----------------------------------------------------------------------------------------
                MFRC522      Arduino       Arduino   Arduino    Arduino          Arduino
@@ -73,6 +67,17 @@ void logOutput(byte *buffer, byte bufferSize) {
     Serial.print(buffer[i], HEX);
   }
 }
+boolean compareBuffers(byte buffer1[], byte buffer2[]) {
+  boolean areEqual = false;
+  if (sizeof(buffer1) == 0 || sizeof(buffer2)== 0) {
+    areEqual =  false;
+  }
+  else if (sizeof(buffer1) != sizeof(buffer2)) {
+    areEqual =  false;
+  }
+
+  return areEqual;
+}
 ///////////////////////////////////////
 void setup() {
   Serial.begin(9600); // Initialize serial communications with the PC
@@ -95,8 +100,8 @@ void setup() {
   wirteOccupiedState(occupied);
 }
 void loop() {
-  occupied = switchIt(occupied);
-  wirteOccupiedState(occupied);
+  //occupied = switchIt(occupied);
+  //wirteOccupiedState(occupied);
 
   // Look for new cards
   if ( ! mfrc522.PICC_IsNewCardPresent())
@@ -130,6 +135,7 @@ void loop() {
 
   MFRC522::StatusCode status;
   byte buffer[18];
+  byte compareBuffer[18];
   byte size = sizeof(buffer);
 
   // Authenticate using key A
@@ -147,16 +153,29 @@ void loop() {
   Serial.println();
 
   // Read data from the block
-  Serial.print(F("Reading data from block ")); Serial.print(blockAddr);
+  Serial.print(F("Reading data from block "));
+  Serial.print(blockAddr);
   Serial.println(F(" ..."));
   status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("MIFARE_Read() failed: "));
     Serial.println(mfrc522.GetStatusCodeName(status));
   }
-  Serial.print(F("Data in block ")); Serial.print(blockAddr); Serial.println(F(":"));
-  logOutput(buffer, 16); Serial.println();
-  Serial.println();
+  else {
+    Serial.print(F("Data in block "));
+    Serial.print(blockAddr);
+    Serial.println(F(":"));
+
+    logOutput(buffer, 16);
+    Serial.println();
+    Serial.println();
+  }
+
+
+  // Halt PICC
+  mfrc522.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522.PCD_StopCrypto1();
 }
 
 
