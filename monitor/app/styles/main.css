@@ -1,3 +1,27 @@
+body {
+    font-family: 'Helvetica', 'Arial';
+    box-sizing: border-box;
+}
+
+.desk {
+    position: absolute;
+    text-align: center;
+    color: white;
+    border: 1px solid grey;
+    height: 18px;
+    width: 11px;
+    font-size: 10px;
+    padding-top: 5px;
+}
+
+.busy {
+    background-color: red;
+}
+
+.free {
+    background-color: green;
+}
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
