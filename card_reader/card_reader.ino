@@ -26,6 +26,8 @@
 
 #define RST_PIN         9           // Configurable, see typical pin layout above
 #define SS_PIN          10          // Configurable, see typical pin layout above
+//uncomment this line if using a Common Anode LED
+#define COMMON_ANODE
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
@@ -33,10 +35,11 @@ MFRC522::MIFARE_Key key;
 /////////////////////////////////////////////////////////////////////
 //set the pins
 /////////////////////////////////////////////////////////////////////
-const int chipSelectPin = 10;
-const int NRSTPD = 5;
-const int LED_RED_PIN = 2;
+// NEED TO BE PWM Pins to support analogWrite Function
+const int LED_RED_PIN = 6;
+const int LED_BLUE_PIN = 5;
 const int LED_GREEN_PIN = 3;
+
 ////////////////////////
 //Set the occuped state
 boolean occupied = false;
@@ -46,16 +49,28 @@ boolean occupied = false;
 //////////////////
 //HELPER FUNCTIONS
 //////////////////
-void wirteOccupiedState(boolean occupied) {
-  if (occupied) {
-    digitalWrite(LED_RED_PIN, HIGH);
-    digitalWrite(LED_GREEN_PIN, LOW);
-  }
-  else {
-    digitalWrite(LED_GREEN_PIN, HIGH);
-    digitalWrite(LED_RED_PIN, LOW);
-  }
+void occupiedSeat() {
+  setColor(255, 0, 0);
 }
+void freeSeat() {
+  setColor(0, 255, 0);
+}
+void reservedSeat() {
+  setColor(255, 102, 0);
+}
+
+void setColor(int red, int green, int blue)
+{
+#ifdef COMMON_ANODE
+  red = 255 - red;
+  green = 255 - green;
+  blue = 255 - blue;
+#endif
+  analogWrite(LED_RED_PIN, red);
+  analogWrite(LED_GREEN_PIN, green);
+  analogWrite(LED_BLUE_PIN, blue);
+}
+
 
 boolean switchIt(boolean input) {
   return !input;
@@ -69,7 +84,7 @@ void logOutput(byte *buffer, byte bufferSize) {
 }
 boolean compareBuffers(byte buffer1[], byte buffer2[]) {
   boolean areEqual = false;
-  if (sizeof(buffer1) == 0 || sizeof(buffer2)== 0) {
+  if (sizeof(buffer1) == 0 || sizeof(buffer2) == 0) {
     areEqual =  false;
   }
   else if (sizeof(buffer1) != sizeof(buffer2)) {
@@ -97,7 +112,8 @@ void setup() {
   Serial.println();
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(LED_GREEN_PIN, OUTPUT);
-  wirteOccupiedState(occupied);
+  pinMode(LED_BLUE_PIN, OUTPUT);
+  freeSeat();
 }
 void loop() {
   //occupied = switchIt(occupied);
@@ -165,7 +181,7 @@ void loop() {
     Serial.print(F("Data in block "));
     Serial.print(blockAddr);
     Serial.println(F(":"));
-
+    occupiedSeat();
     logOutput(buffer, 16);
     Serial.println();
     Serial.println();
