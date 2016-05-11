@@ -11,7 +11,8 @@
     "url": "git+ssh://git@bitbucket.org/sven_schoeni/meet-up.git"
   },
   "dependencies": {
-      "serialport": "~2.1.0"
+      "serialport": "~2.1.0",
+      "nodejs-websocket": "1.6.0"
   },
   "keywords": [
     "arduino",

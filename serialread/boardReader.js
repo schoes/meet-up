@@ -1,4 +1,4 @@
-console.log('Listening on Serial Port...');
+var ws = require("nodejs-websocket")
 
 // Global map which holds all desk states (with desk id as key)
 var deskStates = {};
@@ -14,6 +14,28 @@ var sp = new serialport.SerialPort(portName, {
     parser: serialport.parsers.readline("\r\n")
 });
 
+// Scream server example: "hi" -> "HI!!!"
+//var server = ws.createServer();
+var websocketConnection = undefined;
+
+var server = ws.createServer(function (conn) {
+    console.log("New connection")
+    websocketConnection = conn;
+    conn.on("text", function (str) {
+        console.log("Received "+str)
+        conn.sendText(str.toUpperCase()+"!!!")
+    })
+    conn.on("close", function (code, reason) {
+        console.log("Connection closed")
+    })
+}).listen(8001)
+
+
+server.on("listening", function () {
+    console.log("Socket Ready (localhost:8001) ...")
+})
+
+console.log('Listening on Serial Port...');
 sp.on('data', function(input) {
 
     // parse ARD_STATE string
@@ -41,6 +63,11 @@ sp.on('data', function(input) {
         deskStates[deskId] = {
             "state": state,
             "user": user
+        }
+
+        // send deskStates
+        if (websocketConnection) {
+            websocketConnection.sendText(JSON.stringify(deskStates));
         }
 
         console.log("Desk States Map", deskStates);
