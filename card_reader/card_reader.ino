@@ -27,7 +27,7 @@
 #define RST_PIN         9           // Configurable, see typical pin layout above
 #define SS_PIN          10          // Configurable, see typical pin layout above
 //uncomment this line if using a Common Anode LED
-#define COMMON_ANODE
+//#define COMMON_ANODE
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
@@ -39,6 +39,11 @@ MFRC522::MIFARE_Key key;
 const int LED_RED_PIN = 6;
 const int LED_BLUE_PIN = 5;
 const int LED_GREEN_PIN = 3;
+
+// SEAT STATES
+const int FREE = 0;
+const int BUSY = 1;
+const int RESERVED = 2;
 
 ////////////////////////
 //Set the occuped state
@@ -57,12 +62,14 @@ void busy(byte userId[]) {
   }
   isBusy = true;
   setColor(255, 0, 0);
+  serialWrite(userId, BUSY);
 }
 void releaseSeat(byte userId[]) {
 
   if (compareBuffers(currentUser, userId)) {
     isBusy = false;
     setColor(0, 255, 0);
+    serialWrite(userId, FREE);
   }
   else {
     forbidden();
@@ -81,6 +88,16 @@ void forbidden() {
   setColor(255, 255, 255);
   delay(300);
   setColor(255, 0, 0);
+}
+
+void serialWrite(byte *userId, int state) {
+  Serial.print("ARD_STATE ");
+  Serial.print(state);
+  for (byte i = 0; i < 16; i++) {
+    Serial.print(userId[i] < 0x10 ? " 0" : " ");
+    Serial.print(userId[i], HEX);
+  }
+  Serial.println("");
 }
 
 
@@ -106,6 +123,7 @@ void logOutput(byte *buffer, byte bufferSize) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], HEX);
   }
+
 }
 boolean compareBuffers(byte buffer1[], byte buffer2[]) {
   boolean areEqual = true;
@@ -128,10 +146,10 @@ void setup() {
     key.keyByte[i] = 0xFF;
   }
 
-  Serial.println(F("Scan a MIFARE Classic PICC to demonstrate read and write."));
-  Serial.print(F("Using key (for A and B):"));
-  logOutput(key.keyByte, MFRC522::MF_KEY_SIZE);
-  Serial.println();
+  //Serial.println(F("Scan a MIFARE Classic PICC to demonstrate read and write."));
+  //Serial.print(F("Using key (for A and B):"));
+  //logOutput(key.keyByte, MFRC522::MF_KEY_SIZE);
+  //Serial.println();
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_BLUE_PIN, OUTPUT);
@@ -181,7 +199,7 @@ void loop() {
   byte size = sizeof(buffer);
 
   // Authenticate using key A
-  Serial.println(F("Authenticating using key A..."));
+  //Serial.println(F("Authenticating using key A..."));
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("PCD_Authenticate() failed: "));
@@ -190,14 +208,14 @@ void loop() {
   }
 
   // Show the whole sector as it currently is
-  Serial.println(F("Current data in sector:"));
-  mfrc522.PICC_DumpMifareClassicSectorToSerial(&(mfrc522.uid), &key, sector);
-  Serial.println();
+  //Serial.println(F("Current data in sector:"));
+  //mfrc522.PICC_DumpMifareClassicSectorToSerial(&(mfrc522.uid), &key, sector);
+  //Serial.println();
 
   // Read data from the block
-  Serial.print(F("Reading data from block "));
-  Serial.print(blockAddr);
-  Serial.println(F(" ..."));
+  //Serial.print(F("Reading data from block "));
+  //Serial.print(blockAddr);
+  //Serial.println(F(" ..."));
   status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("MIFARE_Read() failed: "));
@@ -205,18 +223,18 @@ void loop() {
   }
   else {
     //compareBuffer = buffer;
-    Serial.print(F("Data in block "));
-    Serial.print(blockAddr);
-    Serial.println(F(":"));
+    //Serial.print(F("Data in block "));
+    //Serial.print(blockAddr);
+    //Serial.println(F(":"));
     if (isBusy) {
       releaseSeat(buffer);
     }
     else {
       busy(buffer);
     }
-    logOutput(buffer, 16);
-    Serial.println();
-    Serial.println();
+    //logOutput(buffer, 16);
+    //Serial.println();
+    //Serial.println();
   }
 
 
