@@ -1,6 +1,7 @@
 console.log('Listening on Serial Port...');
 
-var deskStates = [];
+// Global map which holds all desk states (with desk id as key)
+var deskStates = {};
 
 var serialport = require('serialport');
 var portName = '/dev/cu.usbmodem1411';
@@ -36,6 +37,13 @@ sp.on('data', function(input) {
         console.log(state);
         console.log(user);
         console.log(userHex);
+
+        deskStates[deskId] = {
+            "state": state,
+            "user": user
+        }
+
+        console.log("Desk States Map", deskStates);
     }
 });
 
