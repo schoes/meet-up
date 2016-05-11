@@ -94,7 +94,8 @@ void forbidden() {
 }
 
 void serialWrite(byte *userId, int state) {
-  Serial.print("ARD_STATE ");
+  Serial.print("ARD_STATE");
+  Serial.print(SEPARATOR);
   Serial.print(state);
   Serial.print(SEPARATOR);
   Serial.print(DESK_ID);
