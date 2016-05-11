@@ -40,6 +40,9 @@ const int LED_RED_PIN = 6;
 const int LED_BLUE_PIN = 5;
 const int LED_GREEN_PIN = 3;
 
+const char SEPARATOR[] = "//";
+const char DESK_ID[] = "MB68-2-001";
+
 // SEAT STATES
 const int FREE = 0;
 const int BUSY = 1;
@@ -93,6 +96,9 @@ void forbidden() {
 void serialWrite(byte *userId, int state) {
   Serial.print("ARD_STATE ");
   Serial.print(state);
+  Serial.print(SEPARATOR);
+  Serial.print(DESK_ID);
+  Serial.print(SEPARATOR);
   for (byte i = 0; i < 16; i++) {
     Serial.print(userId[i] < 0x10 ? " 0" : " ");
     Serial.print(userId[i], HEX);
