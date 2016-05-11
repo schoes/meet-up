@@ -42,20 +42,22 @@ const int LED_GREEN_PIN = 3;
 
 ////////////////////////
 //Set the occuped state
-boolean occupied = false;
+boolean isBusy = false;
 ///////////////////////
 //Maximum length of the array
 #define MAX_LEN 16
 //////////////////
 //HELPER FUNCTIONS
 //////////////////
-void occupiedSeat() {
+void busy() {
+  isBusy = true;
   setColor(255, 0, 0);
 }
-void freeSeat() {
+void releaseSeat() {
+  isBusy = false;
   setColor(0, 255, 0);
 }
-void reservedSeat() {
+void reserve() {
   setColor(255, 102, 0);
 }
 
@@ -113,7 +115,7 @@ void setup() {
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_BLUE_PIN, OUTPUT);
-  freeSeat();
+  releaseSeat();
 }
 void loop() {
   //occupied = switchIt(occupied);
@@ -178,10 +180,16 @@ void loop() {
     Serial.println(mfrc522.GetStatusCodeName(status));
   }
   else {
+    //compareBuffer = buffer;
     Serial.print(F("Data in block "));
     Serial.print(blockAddr);
     Serial.println(F(":"));
-    occupiedSeat();
+    if (isBusy) {
+      releaseSeat();
+    }
+    else{
+       busy();
+    }
     logOutput(buffer, 16);
     Serial.println();
     Serial.println();
