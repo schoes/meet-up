@@ -1,9 +1,5 @@
-/*
- * Test with SerialPort...
- * Notes:
- * - npm install serialport
- * - check correct port name
- */
+console.log('Listening on Serial Port...');
+
 var serialport = require('serialport');
 var portName = '/dev/cu.usbmodem1411';
 var sp = new serialport.SerialPort(portName, {
