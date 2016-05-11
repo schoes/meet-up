@@ -43,23 +43,46 @@ const int LED_GREEN_PIN = 3;
 ////////////////////////
 //Set the occuped state
 boolean isBusy = false;
+//set the userId
+byte currentUser[18];
 ///////////////////////
 //Maximum length of the array
 #define MAX_LEN 16
 //////////////////
 //HELPER FUNCTIONS
 //////////////////
-void busy() {
+void busy(byte userId[]) {
+  for (int i = 0 ; i < sizeof(userId); i++) {
+    currentUser[i] = userId[i];
+  }
   isBusy = true;
   setColor(255, 0, 0);
 }
-void releaseSeat() {
-  isBusy = false;
-  setColor(0, 255, 0);
+void releaseSeat(byte userId[]) {
+
+  if (compareBuffers(currentUser, userId)) {
+    isBusy = false;
+    setColor(0, 255, 0);
+  }
+  else {
+    forbidden();
+  }
+
 }
 void reserve() {
   setColor(255, 102, 0);
 }
+
+void forbidden() {
+  setColor(255, 255, 255);
+  delay(300);
+  setColor(255, 0, 0);
+  delay(300);
+  setColor(255, 255, 255);
+  delay(300);
+  setColor(255, 0, 0);
+}
+
 
 void setColor(int red, int green, int blue)
 {
@@ -85,12 +108,9 @@ void logOutput(byte *buffer, byte bufferSize) {
   }
 }
 boolean compareBuffers(byte buffer1[], byte buffer2[]) {
-  boolean areEqual = false;
-  if (sizeof(buffer1) == 0 || sizeof(buffer2) == 0) {
-    areEqual =  false;
-  }
-  else if (sizeof(buffer1) != sizeof(buffer2)) {
-    areEqual =  false;
+  boolean areEqual = true;
+  for (int i = 0 ; i < sizeof(buffer1); i++) {
+    areEqual &= buffer1[i] == buffer2[i];
   }
 
   return areEqual;
@@ -115,7 +135,11 @@ void setup() {
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_BLUE_PIN, OUTPUT);
-  releaseSeat();
+  //releaseSeat();
+  isBusy = false;
+  setColor(0, 255, 0);
+
+
 }
 void loop() {
   //occupied = switchIt(occupied);
@@ -185,10 +209,10 @@ void loop() {
     Serial.print(blockAddr);
     Serial.println(F(":"));
     if (isBusy) {
-      releaseSeat();
+      releaseSeat(buffer);
     }
-    else{
-       busy();
+    else {
+      busy(buffer);
     }
     logOutput(buffer, 16);
     Serial.println();
