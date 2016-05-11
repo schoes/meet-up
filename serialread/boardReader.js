@@ -1,5 +1,9 @@
 var ws = require("nodejs-websocket")
 var serialport = require('serialport');
+var _ = require('lodash')
+
+var ports = ['/dev/cu.usbmodem1421', '/dev/cu.usbmodem1D1111'];
+// var ports = ['/dev/cu.usbmodem1421'];
 
 // Global map which holds all desk states (with desk id as key)
 var deskStates = {};
@@ -11,27 +15,9 @@ var deskStates = {};
 //  .----)   |   |  |____ |  |\  \----.|  |  /  _____  \  |  `----.   |  |      |  `--'  | |  |\  \----.   |  |
 //  |_______/    |_______|| _| `._____||__| /__/     \__\ |_______|   | _|       \______/  | _| `._____|   |__|
 //
-var portName1411 = '/dev/cu.usbmodem1411';
-var sp1411 = new serialport.SerialPort(portName1411, {
-    baudRate: 9600,
-    dataBits: 8,
-    parity: 'none',
-    stopBits: 1,
-    flowControl: false,
-    parser: serialport.parsers.readline("\r\n")
-});
 
-var portName1421 = '/dev/cu.usbmodem1421';
-var sp1421 = new serialport.SerialPort(portName1421, {
-    baudRate: 9600,
-    dataBits: 8,
-    parity: 'none',
-    stopBits: 1,
-    flowControl: false,
-    parser: serialport.parsers.readline("\r\n")
-});
 
-var readBoardInfo = function(input) {
+var readBoardInfo = function (input) {
 
     // parse ARD_STATE string
     if (input.startsWith("ARD_STATE")) {
@@ -67,17 +53,22 @@ var readBoardInfo = function(input) {
 
         console.log("Desk States Map", deskStates);
     }
-}
+};
 
+_.forEach(ports, function (portName) {
+    var port = new serialport.SerialPort(portName, {
+        baudRate: 9600,
+        dataBits: 8,
+        parity: 'none',
+        stopBits: 1,
+        flowControl: false,
+        parser: serialport.parsers.readline("\r\n")
+    });
 
-sp1411.on('data', readBoardInfo);
-sp1411.on('open', function() {
-    console.log('Listening on Serial Port 1411...');
-});
-
-sp1421.on('data', readBoardInfo);
-sp1421.on('open', function() {
-    console.log('Listening on Serial Port 1421...');
+    port.on('data', readBoardInfo);
+    port.on('open', function () {
+        console.log('Listening on Serial Port :' + portName);
+    });
 });
 
 // helper function: convert hex to ascii
@@ -102,8 +93,8 @@ var server = ws.createServer(function (conn) {
     console.log("New connection")
     websocketConnection = conn;
     conn.on("text", function (str) {
-        console.log("Received "+str)
-        conn.sendText(str.toUpperCase()+"!!!")
+        console.log("Received " + str)
+        conn.sendText(str.toUpperCase() + "!!!")
     })
     conn.on("close", function (code, reason) {
         console.log("Connection closed")

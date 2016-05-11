@@ -27,7 +27,7 @@
 #define RST_PIN         9           // Configurable, see typical pin layout above
 #define SS_PIN          10          // Configurable, see typical pin layout above
 //uncomment this line if using a Common Anode LED
-//#define COMMON_ANODE
+#define COMMON_ANODE
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
@@ -41,7 +41,7 @@ const int LED_BLUE_PIN = 5;
 const int LED_GREEN_PIN = 3;
 
 const char SEPARATOR[] = "//";
-const char DESK_ID[] = "MB68-2-001";
+String currentdeskId = "MB68-2-002";
 
 // SEAT STATES
 const int FREE = 0;
@@ -98,7 +98,7 @@ void serialWrite(byte *userId, int state) {
   Serial.print(SEPARATOR);
   Serial.print(state);
   Serial.print(SEPARATOR);
-  Serial.print(DESK_ID);
+  Serial.print(currentdeskId);
   Serial.print(SEPARATOR);
   for (byte i = 0; i < 16; i++) {
     Serial.print(userId[i] < 0x10 ? " 0" : " ");
@@ -121,17 +121,6 @@ void setColor(int red, int green, int blue)
 }
 
 
-boolean switchIt(boolean input) {
-  return !input;
-}
-
-void logOutput(byte *buffer, byte bufferSize) {
-  for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], HEX);
-  }
-
-}
 boolean compareBuffers(byte buffer1[], byte buffer2[]) {
   boolean areEqual = true;
   for (int i = 0 ; i < sizeof(buffer1); i++) {
@@ -139,6 +128,23 @@ boolean compareBuffers(byte buffer1[], byte buffer2[]) {
   }
 
   return areEqual;
+}
+
+void checkForDeskId() {
+  if (Serial.available() > 0) {
+    String deskId = Serial.readStringUntil('#');
+    Serial.print("Set the DESKID To");
+    Serial.print("");
+    Serial.print(deskId);
+    Serial.print("");
+    currentdeskId = deskId;
+  }
+}
+void logOutput(byte *buffer, byte bufferSize) {
+  for (byte i = 0; i < bufferSize; i++) {
+    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(buffer[i], HEX);
+  }
 }
 ///////////////////////////////////////
 void setup() {
@@ -153,10 +159,6 @@ void setup() {
     key.keyByte[i] = 0xFF;
   }
 
-  //Serial.println(F("Scan a MIFARE Classic PICC to demonstrate read and write."));
-  //Serial.print(F("Using key (for A and B):"));
-  //logOutput(key.keyByte, MFRC522::MF_KEY_SIZE);
-  //Serial.println();
   pinMode(LED_RED_PIN, OUTPUT);
   pinMode(LED_GREEN_PIN, OUTPUT);
   pinMode(LED_BLUE_PIN, OUTPUT);
@@ -167,8 +169,8 @@ void setup() {
 
 }
 void loop() {
-  //occupied = switchIt(occupied);
-  //wirteOccupiedState(occupied);
+
+  checkForDeskId();
 
   // Look for new cards
   if ( ! mfrc522.PICC_IsNewCardPresent())
