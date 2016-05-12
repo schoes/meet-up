@@ -67,15 +67,21 @@ byte currentUser[18];
 //HELPER FUNCTIONS
 //////////////////
 void busy(byte *userId) {
+  char *uId = (char*) userId;
+  String str(uId);
+  str = str.substring(0,7);
+  
+  
   for (int i = 0 ; i < 18; i++) {
     currentUser[i] = userId[i];
+    uId[i] = userId[i];
   }
   isBusy = true;
   setColor(255, 0, 0);
   serialWrite(userId, BUSY);
   
     lcd.setCursor(0,1);
-    lcd.print("Desk besetzt!    ");
+    lcd.print(str + "        ");
 }
 void releaseSeat(byte userId[]) {
 
