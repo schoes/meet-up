@@ -2,8 +2,11 @@ var ws = require("nodejs-websocket")
 var serialport = require('serialport');
 var _ = require('lodash')
 
-var ports = ['/dev/cu.usbmodem14121', '/dev/cu.usbmodem14131'];
+//var ports = ['/dev/cu.usbmodem14121', '/dev/cu.usbmodem14131'];
 //var ports = ['/dev/cu.usbmodem1411'];
+var ports = ['/dev/cu.wchusbserial14140'];
+
+
 
 // Global map which holds all desk states (with desk id as key)
 //var deskStates = {};
