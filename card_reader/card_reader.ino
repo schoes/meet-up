@@ -59,8 +59,8 @@ byte currentUser[18];
 //////////////////
 //HELPER FUNCTIONS
 //////////////////
-void busy(byte userId[]) {
-  for (int i = 0 ; i < sizeof(userId); i++) {
+void busy(byte *userId) {
+  for (int i = 0 ; i < 18; i++) {
     currentUser[i] = userId[i];
   }
   isBusy = true;
@@ -121,13 +121,19 @@ void setColor(int red, int green, int blue)
 }
 
 
-boolean compareBuffers(byte buffer1[], byte buffer2[]) {
-  boolean areEqual = true;
-  for (int i = 0 ; i < sizeof(buffer1); i++) {
-    areEqual &= buffer1[i] == buffer2[i];
+boolean compareBuffers(byte *buffer1, byte *buffer2) {
+  if (sizeof(buffer1) != sizeof(buffer2)) {
+    return false;
   }
 
-  return areEqual;
+  for (int i = 0 ; i < 18; i++) {
+    boolean elemenEqual = buffer1[i] == buffer2[i];
+    if (!elemenEqual) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void checkForDeskId() {
@@ -204,7 +210,6 @@ void loop() {
 
   MFRC522::StatusCode status;
   byte buffer[18];
-  byte compareBuffer[18];
   byte size = sizeof(buffer);
 
   // Authenticate using key A
@@ -231,10 +236,6 @@ void loop() {
     Serial.println(mfrc522.GetStatusCodeName(status));
   }
   else {
-    //compareBuffer = buffer;
-    //Serial.print(F("Data in block "));
-    //Serial.print(blockAddr);
-    //Serial.println(F(":"));
     if (isBusy) {
       releaseSeat(buffer);
     }
