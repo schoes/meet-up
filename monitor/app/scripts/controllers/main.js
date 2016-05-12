@@ -1,27 +1,39 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name monitorApp.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the monitorApp
- */
 angular.module('monitorApp')
     .controller('MainCtrl', function ($scope) {
 
-        $scope.state = 0;
+        $scope.deskStates = {
+            'MB68-2-001': { state: '0', user: 'U112586' },
+            'MB68-2-002': { state: '0', user: 'U112093' }
+        };
+        $scope.searchString = '';
 
         $scope.$on('deskStatesChanged', function(event, deskStates) {
-
-            $scope.state = deskStates['MB68-2-001'].state;
-            console.log($scope.state);
+            $scope.deskStates = deskStates;
             $scope.$apply();
         });
 
-        $scope.isBusy = function() {
-            return $scope.state === '1';
+        $scope.isBusy = function(deskId) {
+            return $scope.deskStates[deskId] && $scope.deskStates[deskId].state === '1' && !isSearchActive();
         };
+
+        $scope.isFree = function(deskId) {
+            return $scope.deskStates[deskId] && $scope.deskStates[deskId].state === '0' && !isSearchActive();
+        };
+
+        $scope.isSearchMatch = function(deskId) {
+            if (isSearchActive()) {
+                return $scope.deskStates[deskId].user.toLowerCase() === $scope.searchString.toLowerCase();
+            }
+            return false;
+        }
+
+        function isSearchActive() {
+            return $scope.searchString.length > 0;
+        }
+
+
     })
 
     // OPEN WEBSOCKET
@@ -45,7 +57,16 @@ angular.module('monitorApp')
             try {
                 var deskStates = JSON.parse(e.data);
                 console.log('Receiving desk state from server', deskStates);
+
+                // MOCK
+/*
+                deskStates = {
+                    'MB68-2-001': { state: '0', user: 'U112093' },
+                    'MB68-2-002': { state: '1', user: 'U112586' }
+                };*/
+
                 $rootScope.$broadcast('deskStatesChanged', deskStates);
+
             } catch (err) {
                 console.log(err);
             }

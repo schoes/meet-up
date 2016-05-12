@@ -2,11 +2,15 @@ var ws = require("nodejs-websocket")
 var serialport = require('serialport');
 var _ = require('lodash')
 
-var ports = ['/dev/cu.usbmodem1421', '/dev/cu.usbmodem1D1111'];
-// var ports = ['/dev/cu.usbmodem1421'];
+//var ports = ['/dev/cu.usbmodem1421', '/dev/cu.usbmodem1D1111'];
+var ports = ['/dev/cu.usbmodem1411'];
 
 // Global map which holds all desk states (with desk id as key)
-var deskStates = {};
+//var deskStates = {};
+var deskStates = {
+    'MB68-2-001': { state: '0', user: '' },
+    'MB68-2-002': { state: '0', user: '' }
+};
 
 //       _______. _______ .______       __       ___       __         .______     ______   .______     .___________.
 //      /       ||   ____||   _  \     |  |     /   \     |  |        |   _  \   /  __  \  |   _  \    |           |
@@ -103,5 +107,5 @@ var server = ws.createServer(function (conn) {
 
 
 server.on("listening", function () {
-    console.log("Socket Ready (localhost:8001) ...")
+    console.log("Socket Ready (localhost:8001) ...");
 })
