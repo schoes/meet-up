@@ -24,7 +24,7 @@ angular.module('monitorApp')
 
         $scope.isSearchMatch = function(deskId) {
             if (isSearchActive()) {
-                return $scope.deskStates[deskId].user.toLowerCase() === $scope.searchString.toLowerCase();
+                return $scope.deskStates[deskId].user.toLowerCase() === $scope.searchString.toLowerCase()&& $scope.deskStates[deskId].state === '1';
             }
             return false;
         }
