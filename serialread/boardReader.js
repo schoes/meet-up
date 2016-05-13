@@ -2,9 +2,9 @@ var ws = require("nodejs-websocket")
 var serialport = require('serialport');
 var _ = require('lodash')
 
-//var ports = ['/dev/cu.usbmodem14121', '/dev/cu.usbmodem14131'];
+var ports = ['/dev/cu.usbmodem14121', '/dev/cu.wchusbserial14140'];
 //var ports = ['/dev/cu.usbmodem1411'];
-var ports = ['/dev/cu.wchusbserial14140'];
+//var ports = ['/dev/cu.wchusbserial14140'];
 
 
 
